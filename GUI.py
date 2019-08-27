@@ -27,16 +27,9 @@ window.title('Number Plate Recognition System')
 window.geometry('1000x700')
 
 
-
-# chsobin's logo
-#canvas = tk.Canvas(window, width=150, height=150)
-#image_file = tk.PhotoImage(file='icon.png')
-#image = canvas.create_image(0,0, anchor='nw', image=image_file)
-#canvas.place(x=20, y=20)
-
-
 canvas_pic = tk.Canvas(window, width=700, height=600)
 canvas_pic.pack(side='right')
+
 
 def printcoords():
     File = filedialog.askopenfilename(parent=window, title='Please select an image')
@@ -86,11 +79,10 @@ def location():
             canvas_plate.image = filename
             canvas_plate.create_image(100, 25, image=filename)
 
+
 btn_location = tk.Button(window, text='Start positioning', command=location)
 btn_location.place(x=40, y=250)
 tk.Label(window, text='License plate location result: ', font='18', width=18).place(x=20, y= 300)
-
-
 
 
 var_returnMsg = tk.StringVar()
@@ -109,11 +101,11 @@ def recognition():
     result = tool.getCarNumberByBaiDuAI(baiduAIAccessToken, outputPicturePath+pictureName)
     if 'error_code' in result:
         print("--------  " + outputPicturePath + pictureName)
-        print("!!!!错误：百度ai识别失败，错误信息为", result)
+        print("!!! Error", result)
     else:
         print("--------  " + outputPicturePath + pictureName)
-        print("颜色：" + result['words_result']['color'])
-        print("号码：" + result['words_result']['number'])
+        print("Colour：" + result['words_result']['color'])
+        print("Number：" + result['words_result']['number'])
         var_returnMsg.set(result['words_result']['color'] + "  " + result['words_result']['number'])
 
 

@@ -1,20 +1,18 @@
+import Operations
+import Plate_OCR
+import TracePlate
+import CharRecog
 import cv2
 import numpy as np
 import math
 import Run
 import random
-
-import Operations
-import Plate_OCR
-import TracePlate
-import CharRecog
-
 PLATE_WIDTH_PADDING_FACTOR = 1.3
 PLATE_HEIGHT_PADDING_FACTOR = 1.5
 
 
 def detectPlatesInScene(imgOriginalScene):
-    listOfPossiblePlates = []  # this will be the return value
+    listOfPossiblePlates = []
 
     height, width, numChannels = imgOriginalScene.shape
 
@@ -28,19 +26,17 @@ def detectPlatesInScene(imgOriginalScene):
         cv2.imshow("0", imgOriginalScene)
 
     imgGrayscaleScene, imgThreshScene = Operations.preprocess(
-        imgOriginalScene)  # preprocess to get grayscale and threshold images
+        imgOriginalScene)
 
     if Run.showSteps == True:
         cv2.imshow("1a", imgGrayscaleScene)
         cv2.imshow("1b", imgThreshScene)
 
-        # find all possible chars in the scene,
-        # this function first finds all contours, then only includes contours that could be chars (without comparison to other chars yet)
     listOfPossibleCharsInScene = findPossibleCharsInScene(imgThreshScene)
 
     if Run.showSteps == True:
         print("step 2 - len(listOfPossibleCharsInScene) = " + str(
-            len(listOfPossibleCharsInScene)))  # 131 with MCLRNF1 image
+            len(listOfPossibleCharsInScene)))
 
         imgContours = np.zeros((height, width, 3), np.uint8)
 
@@ -48,18 +44,15 @@ def detectPlatesInScene(imgOriginalScene):
 
         for possibleChar in listOfPossibleCharsInScene:
             contours.append(possibleChar.contour)
-        # end for
 
         cv2.drawContours(imgContours, contours, -1, Run.SCALAR_WHITE)
         cv2.imshow("2b", imgContours)
 
-        # given a list of all possible chars, find groups of matching chars
-        # in the next steps each group of matching chars will attempt to be recognized as a plate
     listOfListsOfMatchingCharsInScene = Plate_OCR.findListOfListsOfMatchingChars(listOfPossibleCharsInScene)
 
     if Run.showSteps == True:
         print("step 3 - listOfListsOfMatchingCharsInScene.Count = " + str(
-            len(listOfListsOfMatchingCharsInScene)))  # 13 with MCLRNF1 image
+            len(listOfListsOfMatchingCharsInScene)))
 
         imgContours = np.zeros((height, width, 3), np.uint8)
 
@@ -72,21 +65,17 @@ def detectPlatesInScene(imgOriginalScene):
 
             for matchingChar in listOfMatchingChars:
                 contours.append(matchingChar.contour)
-            # end for
 
             cv2.drawContours(imgContours, contours, -1, (intRandomBlue, intRandomGreen, intRandomRed))
-        # end for
 
         cv2.imshow("3", imgContours)
-    for listOfMatchingChars in listOfListsOfMatchingCharsInScene:  # for each group of matching chars
-        possiblePlate = extractPlate(imgOriginalScene, listOfMatchingChars)  # attempt to extract plate
+    for listOfMatchingChars in listOfListsOfMatchingCharsInScene:
+        possiblePlate = extractPlate(imgOriginalScene, listOfMatchingChars)
 
-        if possiblePlate.imgPlate is not None:  # if plate was found
-            listOfPossiblePlates.append(possiblePlate)  # add to list of possible plates
-        # end if
-    # end for
+        if possiblePlate.imgPlate is not None:
+            listOfPossiblePlates.append(possiblePlate)
 
-    print("\n" + str(len(listOfPossiblePlates)) + " possible plates found")  # 13 with MCLRNF1 image
+    print("\n" + str(len(listOfPossiblePlates)) + " possible plates found")
 
     if Run.showSteps == True:
         print("\n")
@@ -106,7 +95,6 @@ def detectPlatesInScene(imgOriginalScene):
 
             cv2.imshow("4b", listOfPossiblePlates[i].imgPlate)
             cv2.waitKey(0)
-        # end for
 
         print("\nplate detection complete, click on any image and press a key to begin char recognition . . .\n")
         cv2.waitKey(0)
@@ -114,22 +102,20 @@ def detectPlatesInScene(imgOriginalScene):
     return listOfPossiblePlates
 
 
-# end function
-
 def findPossibleCharsInScene(imgThresh):
-    listOfPossibleChars = []  # this will be the return value
+    listOfPossibleChars = []
 
     intCountOfPossibleChars = 0
 
     imgThreshCopy = imgThresh.copy()
 
     contours, npaHierarchy = cv2.findContours(imgThreshCopy, cv2.RETR_LIST,
-                                              cv2.CHAIN_APPROX_SIMPLE)  # find all contours
+                                              cv2.CHAIN_APPROX_SIMPLE)
 
     height, width = imgThresh.shape
     imgContours = np.zeros((height, width, 3), np.uint8)
 
-    for i in range(0, len(contours)):  # for each contour
+    for i in range(0, len(contours)):
 
         if Run.showSteps == True:
             cv2.drawContours(imgContours, contours, i, Run.SCALAR_WHITE)
@@ -137,30 +123,23 @@ def findPossibleCharsInScene(imgThresh):
         possibleChar = CharRecog.CharRecog(contours[i])
 
         if Plate_OCR.checkIfPossibleChar(
-                possibleChar):  # if contour is a possible char, note this does not compare to other chars (yet) . . .
-            intCountOfPossibleChars = intCountOfPossibleChars + 1  # increment count of possible chars
-            listOfPossibleChars.append(possibleChar)  # and add to list of possible chars
-        # end if
-    # end for
+                possibleChar):
+            intCountOfPossibleChars = intCountOfPossibleChars + 1
+            listOfPossibleChars.append(possibleChar)
 
     if Run.showSteps == True:
-        print("\nstep 2 - len(contours) = " + str(len(contours)))  # 2362 with MCLRNF1 image
-        print("step 2 - intCountOfPossibleChars = " + str(intCountOfPossibleChars))  # 131 with MCLRNF1 image
+        print("\nstep 2 - len(contours) = " + str(len(contours)))
+        print("step 2 - intCountOfPossibleChars = " + str(intCountOfPossibleChars))
         cv2.imshow("2a", imgContours)
 
     return listOfPossibleChars
 
 
-# end function
-
-
 def extractPlate(imgOriginal, listOfMatchingChars):
-    possiblePlate = TracePlate.TracePlate()  # this will be the return value
+    possiblePlate = TracePlate.TracePlate()
 
     listOfMatchingChars.sort(
-        key=lambda matchingChar: matchingChar.intCenterX)  # sort chars from left to right based on x position
-
-    # calculate the center point of the plate
+        key=lambda matchingChar: matchingChar.intCenterX)
     fltPlateCenterX = (listOfMatchingChars[0].intCenterX + listOfMatchingChars[
         len(listOfMatchingChars) - 1].intCenterX) / 2.0
     fltPlateCenterY = (listOfMatchingChars[0].intCenterY + listOfMatchingChars[
@@ -168,7 +147,6 @@ def extractPlate(imgOriginal, listOfMatchingChars):
 
     ptPlateCenter = fltPlateCenterX, fltPlateCenterY
 
-    # calculate plate width and height
     intPlateWidth = int((listOfMatchingChars[len(listOfMatchingChars) - 1].intBoundingRectX + listOfMatchingChars[
         len(listOfMatchingChars) - 1].intBoundingRectWidth - listOfMatchingChars[
                              0].intBoundingRectX) * PLATE_WIDTH_PADDING_FACTOR)
@@ -177,47 +155,28 @@ def extractPlate(imgOriginal, listOfMatchingChars):
 
     for matchingChar in listOfMatchingChars:
         intTotalOfCharHeights = intTotalOfCharHeights + matchingChar.intBoundingRectHeight
-    # end for
 
     fltAverageCharHeight = intTotalOfCharHeights / len(listOfMatchingChars)
 
     intPlateHeight = int(fltAverageCharHeight * PLATE_HEIGHT_PADDING_FACTOR)
 
-    # calculate correction angle of plate region
     fltOpposite = listOfMatchingChars[len(listOfMatchingChars) - 1].intCenterY - listOfMatchingChars[0].intCenterY
     fltHypotenuse = Plate_OCR.distanceBetweenChars(listOfMatchingChars[0],
                                                      listOfMatchingChars[len(listOfMatchingChars) - 1])
     fltCorrectionAngleInRad = math.asin(fltOpposite / fltHypotenuse)
     fltCorrectionAngleInDeg = fltCorrectionAngleInRad * (180.0 / math.pi)
 
-    # pack plate region center point, width and height, and correction angle into rotated rect member variable of plate
     possiblePlate.rrLocationOfPlateInScene = (
     tuple(ptPlateCenter), (intPlateWidth, intPlateHeight), fltCorrectionAngleInDeg)
 
-    # final steps are to perform the actual rotation
-
-    # get the rotation matrix for our calculated correction angle
     rotationMatrix = cv2.getRotationMatrix2D(tuple(ptPlateCenter), fltCorrectionAngleInDeg, 1.0)
 
-    height, width, numChannels = imgOriginal.shape  # unpack original image width and height
+    height, width, numChannels = imgOriginal.shape
 
-    imgRotated = cv2.warpAffine(imgOriginal, rotationMatrix, (width, height))  # rotate the entire image
+    imgRotated = cv2.warpAffine(imgOriginal, rotationMatrix, (width, height))
 
     imgCropped = cv2.getRectSubPix(imgRotated, (intPlateWidth, intPlateHeight), tuple(ptPlateCenter))
 
-    possiblePlate.imgPlate = imgCropped  # copy the cropped plate image into the applicable member variable of the possible plate
+    possiblePlate.imgPlate = imgCropped
 
     return possiblePlate
-# end function
-
-
-
-
-
-
-
-
-
-
-
-
