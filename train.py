@@ -42,7 +42,7 @@ def cross_validation(model, num_of_fold, train_data, train_label):
     # e.g if num_of_fold is 4, then we are performing a 4-fold cross validation
     # it will divide the dataset into 4 and use 1/4 of it for testing
     # and the remaining 3/4 for the training
-    accuracy_result = cross_val_score(model, train_data, train_label,cv=num_of_fold)
+    accuracy_result = cross_val_score(model, train_data, train_label, cv=num_of_fold)
     print("Cross Validation Result for ", str(num_of_fold), " -fold")
     print(accuracy_result * 100)
 
