@@ -74,8 +74,16 @@ for count in range(72, 73):
 **Model Training Result**
 ![](/trainingresult.JPG)
 
+**GUI Layout**(code isn't complete)
+![](/GUI.JPG)
+
+
 ## File Description
-os : Windows 8.1
+OS : Windows 8.1 64 bit 
+
+Processor:Intel(R) Celeron(R) CPU 1000M   1.80 Ghz
+
+RAM: 6.00 GB
 
 GPU : None
 
