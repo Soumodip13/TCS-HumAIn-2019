@@ -67,3 +67,20 @@ for count in range(72, 73):
 ![](/steps/11.JPG)
 ![](/steps/12.JPG)
 ![](/steps/14.JPG)
+
+**Output**
+![](/Detectedplates/lpr72.jpeg)
+
+**Model Training Result**
+![](/trainingresult.JPG)
+
+## File Description
+os : Windows 8.1
+
+GPU : None
+
+Python : 3.7
+## Python Packages used
+![](/packagesused.JPG)
+
+:octocat:
