@@ -75,7 +75,7 @@ for count in range(72, 73):
 ![](/trainingresult.JPG)
 
 **GUI Layout**(code isn't complete)
-![](/GUI.JPG)
+![](/GUI.jpg)
 
 
 ## File Description
